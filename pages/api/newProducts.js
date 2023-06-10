@@ -6,12 +6,11 @@ import { Product } from "@/models/Product";
 export default async function handler(req, res) {
   const { method } = req;
   await mongooseConnect();
-  
-  if (method === "GET") {
 
-    if(req.query?.id){
-      res.json(await Product.findOne({_id:req.query.id}));
-    }else{
+  if (method === "GET") {
+    if (req.query?.id) {
+      res.json(await Product.findOne({ _id: req.query.id }));
+    } else {
       res.json(await Product.find());
     }
   }
@@ -25,5 +24,15 @@ export default async function handler(req, res) {
     });
 
     res.json(productDoc);
+  }
+
+  if (method === "PUT") {
+    const { productName, description, price, _id } = req.body;
+    await Product.updateOne(
+      { _id },
+      { productName, description, price }
+    );
+
+    res.json(true);
   }
 }
