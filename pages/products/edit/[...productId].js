@@ -12,7 +12,7 @@ export default function editProductPage() {
 
   useEffect(() => {
     if (productId) {
-      axios.get("/api/newProducts?id=" + productId).then((response) => {
+      axios.get("/api/products?id=" + productId).then((response) => {
         setProductInfo(response.data);
       });
     }
