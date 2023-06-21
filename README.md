@@ -1,38 +1,97 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Pseudo instructions for specifcs implementations 
 
-## Getting Started
+## Google auth
 
-First, run the development server:
+First, we need app to return a session provider
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+<SessionProvider session={session}>
+      <Component {...pageProps}/>
+    </SessionProvider>
+```
+then we have useSession to track the session
+
+```bash
+const { data: session } = useSession();
+```
+we can check session at the beginning from that useSession
+the sign in button is 
+```bash
+ <button onClick={() => signIn('google')}>...</button>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## MongoDB
+We first need to connect to mongoDB
+```bash
+mongoose.connect(uri);
+```
+Then we need to create a schema and a model 
+```bash
+const ProductSchema = new Schema({
+    productName : {type: String, required: true},
+    description : String,
+    price : {type: Number, required: true},
+});
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+export const Product = mongoose.models.Product ||  model('Product', ProductSchema);
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+## Adding images to AWS bucket 
+First, create the bucket, ?(a policy), and a user 
+### reading files 
+fs to read file <br />
+mime-types for identifying file types <br />
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+We need to create a client to send the image 
+```bash
+const client = new S3Client({
+    region: "...",
+    credentials: {
+      accessKeyId: ...,
+      secretAccessKey: ...,
+    },
+  });
+```
+For sending the image 
+```bash
+await client.send(
+      new PutObjectCommand({
+        Bucket: bucketName,
+        Key: newFilename,
+        Body: fs.readFileSync(file.path),
+        ACL: "...",
+        ContentType: mime.lookup(file.path),
+      })
+    );
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## multiparty for image upload 
 
-## Learn More
+we add all the images to a FormData and we're going to send this data in a specific format
+```bash
+const res = await axios.post('/api/upload', data, {
+        headers:{'Content-Type':'multipart/form-data'}
+      });
+```  
+we need specific config for the api handler 
+```bash
+export const config = {
+  api: { bodyParser: false },
+};
+```
 
-To learn more about Next.js, take a look at the following resources:
+when we get the data, we need check, and grab the files
+```bash
+const form = new multiparty.Form();
+  const { fields, files } = await new Promise((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) reject(err);
+      resolve({ fields, files });
+    });
+  });
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+the resolve/reject from promise is checking, and saving in files.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
