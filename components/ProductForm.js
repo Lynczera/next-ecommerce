@@ -2,6 +2,8 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
+//product form works for both editing and creating a new product 
+
 export default function ProductForm({
   _id,
   productName: currTittle,
