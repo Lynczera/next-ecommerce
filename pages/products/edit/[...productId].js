@@ -4,10 +4,10 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
+///Page for editing product
 export default function editProductPage() {
   const [productInfo, setProductInfo] = useState(null);
   const router = useRouter();
-  console.log({router});
   const { productId } = router.query;
 
   useEffect(() => {
