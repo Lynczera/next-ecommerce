@@ -1,14 +1,15 @@
 import Layout from "@/components/Layout";
 import axios from "axios";
 import { useEffect, useState } from "react";
-
-export default function Categories() {
+import { withSwal } from "react-sweetalert2";
+function Categories({ swal }) {
 	const [editedCategory, setEditedCategory] = useState(null);
 	const [name, setName] = useState("");
 	const [categories, setCategories] = useState([]);
 	const [parentCategory, setParentCategory] = useState("");
-	
+
 	const data = { name, parentCategory };
+
 	useEffect(() => {
 		fetchCategories();
 	}, []);
@@ -28,6 +29,7 @@ export default function Categories() {
 			});
 			setEditedCategory(null);
 		} else {
+			console.log(name);
 			await axios.post("/api/categories", { data });
 		}
 		setName("");
@@ -39,12 +41,29 @@ export default function Categories() {
 		setName(category.name);
 		setParentCategory(category.parent?._id);
 	}
+
+	 function deleteCategory(category) {
+		swal
+			.fire({
+				title: "Delete?",
+				text: `Delete ${category.name}?`, 
+				showCancelButton: true,
+				confirmButtonText: "Confirm",
+			})
+			.then(async (result) => {
+				if (result.isConfirmed) {
+					await axios.delete("/api/categories?_id="+category._id);
+					fetchCategories();
+				} else {
+				}
+			});
+	}
 	return (
 		<Layout>
 			<h1>Categories</h1>
 			<label>
 				{editedCategory
-					? `Editing category ${editedCategory.name}` 
+					? `Editing category ${editedCategory.name}`
 					: "Create new category"}
 			</label>
 			<form
@@ -102,7 +121,13 @@ export default function Categories() {
 											}}>
 											Edit
 										</button>
-										<button className="btn-primary">Delete</button>
+										<button
+											className="btn-primary"
+											onClick={() => {
+												deleteCategory(category);
+											}}>
+											Delete
+										</button>
 									</td>
 								</tr>
 							);
@@ -112,3 +137,6 @@ export default function Categories() {
 		</Layout>
 	);
 }
+export default withSwal(({ swal }) => {
+	return <Categories swal={swal} />;
+});

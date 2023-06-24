@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Spinner from "./Spinner";
 import { ReactSortable } from "react-sortablejs";
 
@@ -12,18 +12,26 @@ export default function ProductForm({
 	description: currDescription,
 	price: currPrice,
 	images: existingImages,
+	category : currCategory,
 }) {
 	const [productName, setProductName] = useState(currTittle || "");
 	const [description, setDescription] = useState(currDescription || "");
 	const [price, setPrice] = useState(currPrice || 0);
+	const [category, setCategory] = useState(currCategory || "");
 	const [goToProducts, setGoToProducts] = useState(false);
 	const router = useRouter();
+	const [categories, setCategories] = useState([]);
+	useEffect(() => {
+		axios.get("/api/categories").then((result) => {
+			setCategories(result.data);
+		});
+	}, []);
 	const [images, setImages] = useState(existingImages || []);
 	const [isUploading, setIsUploading] = useState(false);
 
 	async function saveProduct(e) {
 		e.preventDefault();
-		const data = { productName, description, price, images };
+		const data = { productName, description, price, images, category };
 		if (_id) {
 			//update
 			await axios.put("/api/products", { ...data, _id });
@@ -77,6 +85,20 @@ export default function ProductForm({
 					setProductName(e.target.value);
 				}}
 			/>
+
+			<label>Category</label>
+
+			<select
+				value={category}
+				onChange={(ev) => {
+					setCategories(ev.target.value);
+				}}>
+				<option value="">No category</option>
+				{categories.length > 0 &&
+					categories.map((category) => {
+						return <option value={category._id}>{category.name}</option>;
+					})}
+			</select>
 
 			<label>Photos</label>
 			<div className="mb-2 flex flex-wrap gap-2">
@@ -155,7 +177,7 @@ export default function ProductForm({
 				</button>
 
 				<button
-        type="button"
+					type="button"
 					className="btn-primary"
 					onClick={cancelForm}>
 					Cancel
