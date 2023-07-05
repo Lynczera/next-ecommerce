@@ -11,19 +11,13 @@ export default async function handle(req, res) {
 	}
 
 	if (method === "POST") {
-		const { name, parentCategory } = req.body.data;
-		if (!!parentCategory) {
-			const categoryDoc = await Category.create({
-				name,
-				parent: parentCategory,
-			});
+		const { name, parentCategory } = req.body;
+		const categoryDoc = await Category.create({
+			name,
+			parent: parentCategory || undefined,
+			properties,
+		});
 		res.json(categoryDoc);
-
-		} else {
-			const categoryDoc = await Category.create({ name });
-		res.json(categoryDoc);
-
-		}
 	}
 
 	if (method === "PUT") {
@@ -38,12 +32,11 @@ export default async function handle(req, res) {
 			res.json(categoryDoc);
 		} else {
 			console.log("category doest not exist : " + parentCategory);
-			
 
 			const categoryDoc = await Category.updateOne(
 				{ _id },
 				// { name },
-				{ $unset: { parent: 1 }, $set : {name}}
+				{ $unset: { parent: 1 }, $set: { name } }
 			);
 			res.json(categoryDoc);
 		}

@@ -91,7 +91,7 @@ export default function ProductForm({
 			<select
 				value={category}
 				onChange={(ev) => {
-					setCategories(ev.target.value);
+					setCategory(ev.target.value);
 				}}>
 				<option value="">No category</option>
 				{categories.length > 0 &&
