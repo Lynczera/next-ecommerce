@@ -94,4 +94,13 @@ const form = new multiparty.Form();
 the resolve/reject from promise is checking, and saving in files.
 
 
+## General React 
+
+useState to track the variable <br />
+use a function on some onChange to set the useState <br />
+Show the variable with a map or something else <br />
+Whenever the variable is changed, the function will handle it. Since is changed, <br />
+whenever we display the variable, it will show the new updated. Remember that components <br />
+will be reloaded by reactStates. 
+
 

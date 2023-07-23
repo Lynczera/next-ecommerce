@@ -11,7 +11,7 @@ export default async function handle(req, res) {
 	}
 
 	if (method === "POST") {
-		const { name, parentCategory } = req.body;
+		const { name, parentCategory, properties } = req.body;
 		const categoryDoc = await Category.create({
 			name,
 			parent: parentCategory || undefined,
@@ -21,25 +21,13 @@ export default async function handle(req, res) {
 	}
 
 	if (method === "PUT") {
-		const { name, parentCategory, _id } = req.body;
+		const { name, parentCategory, properties, _id } = req.body;
 
-		if (!!parentCategory) {
-			console.log("category exist : " + parentCategory);
-			const categoryDoc = await Category.updateOne(
-				{ _id },
-				{ name, parent: parentCategory }
-			);
-			res.json(categoryDoc);
-		} else {
-			console.log("category doest not exist : " + parentCategory);
-
-			const categoryDoc = await Category.updateOne(
-				{ _id },
-				// { name },
-				{ $unset: { parent: 1 }, $set: { name } }
-			);
-			res.json(categoryDoc);
-		}
+		const categoryDoc = await Category.updateOne(
+			{ _id },
+			{ name, parent: parentCategory || undefined, properties }
+		);
+		res.json(categoryDoc);
 	}
 
 	if (method === "DELETE") {
