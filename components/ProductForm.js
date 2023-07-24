@@ -12,12 +12,15 @@ export default function ProductForm({
 	description: currDescription,
 	price: currPrice,
 	images: existingImages,
-	category : currCategory,
+	category: currCategory,
+	properties : assignedProps,
+
 }) {
 	const [productName, setProductName] = useState(currTittle || "");
 	const [description, setDescription] = useState(currDescription || "");
 	const [price, setPrice] = useState(currPrice || 0);
 	const [category, setCategory] = useState(currCategory || "");
+	const [productProps, setproductProps] = useState(assignedProps || {});
 	const [goToProducts, setGoToProducts] = useState(false);
 	const router = useRouter();
 	const [categories, setCategories] = useState([]);
@@ -31,7 +34,7 @@ export default function ProductForm({
 
 	async function saveProduct(e) {
 		e.preventDefault();
-		const data = { productName, description, price, images, category };
+		const data = { productName, description, price, images, category,properties : productProps };
 		if (_id) {
 			//update
 			await axios.put("/api/products", { ...data, _id });
@@ -74,6 +77,25 @@ export default function ProductForm({
 		router.push("/products");
 	}
 
+	function setproductProp(propName, value) {
+		setproductProps((prev) => {
+			const newProdProps = { ...prev };
+			newProdProps[propName] = value;
+			return newProdProps;
+		});
+	}
+
+	const propertiesFill = [];
+	if (categories.length > 0 && category) {
+		let catInfo = categories.find(({ _id }) => _id === category);
+		propertiesFill.push(...catInfo.properties);
+
+		while (catInfo?.parent?._id) {
+			const parent = categories.find(({ _id }) => _id === catInfo?.parent?._id);
+			propertiesFill.push(...parent.properties);
+			catInfo = parent;
+		}
+	}
 	return (
 		<form onSubmit={saveProduct}>
 			<label>Product name</label>
@@ -99,6 +121,19 @@ export default function ProductForm({
 						return <option value={category._id}>{category.name}</option>;
 					})}
 			</select>
+			{propertiesFill.length > 0 &&
+				propertiesFill.map((prop) => (
+					<div className="flex gap-1">
+						<div className="">{prop.name}</div>
+						<select
+							value={productProps[prop.name]}
+							onChange={(ev) => setproductProp(prop.name, ev.target.value)}>
+							{prop.values.map((val) => (
+								<option value={val}>{val}</option>
+							))}
+						</select>
+					</div>
+				))}
 
 			<label>Photos</label>
 			<div className="mb-2 flex flex-wrap gap-2">

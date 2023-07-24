@@ -49,7 +49,13 @@ function Categories({ swal }) {
 		setEditedCategory(category);
 		setName(category.name);
 		setParentCategory(category.parent?._id);
-		setProperties(category.properties);
+		console.log(category.properties);
+		setProperties(
+			category.properties.map(({name,values})=>({
+				name,
+				values:values.join(',')
+			}))
+		);
 	}
 
 	function deleteCategory(category) {
@@ -79,7 +85,7 @@ function Categories({ swal }) {
 	function handlePropNameChanged(index, prop, newName) {
 		setProperties((prev) => {
 			const prevProps = [...prev];
-			properties[index].name = newName;
+			prevProps[index].name = newName;
 			return prevProps;
 		});
 	}
@@ -87,7 +93,7 @@ function Categories({ swal }) {
 	function handlePropValuesChanged(index, prop, newValues) {
 		setProperties((prev) => {
 			const prevProps = [...prev];
-			properties[index].values = newValues;
+			prevProps[index].values = newValues;
 			return prevProps;
 		});
 	}
@@ -156,7 +162,7 @@ function Categories({ swal }) {
 									}
 									className="mb-0"
 									type="text"
-									value={prop.value}
+									value={prop.values}
 									placeholder="values, comma separated"
 								/>
 								<button
@@ -179,6 +185,7 @@ function Categories({ swal }) {
 								setEditedCategory(null);
 								setName("");
 								setParentCategory("");
+								setProperties([]);
 							}}>
 							Cancel
 						</button>
