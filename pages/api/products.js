@@ -2,10 +2,12 @@
 
 import { mongooseConnect } from "@/lib/mongoose";
 import { Product } from "@/models/Product";
+import { isAdmReq } from "./auth/[...nextauth]";
 
 export default async function handler(req, res) {
   const { method } = req;
   await mongooseConnect();
+	await isAdmReq(req,res);
 
   if (method === "GET") {
     if (req.query?.id) {
